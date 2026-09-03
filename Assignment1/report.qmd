@@ -1,195 +1,115 @@
 ---
-title: "Assignment 1: Univariate and Multivariate Statistics"
+title: "Assignment 1"
 subtitle: "FinTech 545 - Quantitative Risk Management"
 author: "Yiting Sun"
 date: "September 3, 2026"
 output-file: "Assignment1_Report.pdf"
 format:
   typst:
-    toc: true
-    number-sections: true
+    toc: false
+    number-sections: false
     papersize: us-letter
     margin:
-      x: 0.78in
-      y: 0.72in
+      x: 0.8in
+      y: 0.75in
 ---
 
-# Computational conventions
+For the moment calculations, I use denominator $n$ and report excess kurtosis.
+For model comparisons, I use
+$\operatorname{AICc}=\operatorname{AIC}+(2k^2+2k)/(n-k-1)$.
 
-All predictions below are based only on the diagnostic information allowed in
-the prompt: moments for Problem 1, the scatter plot for Problem 2, pair plots
-for Problem 3, the covariance matrix for Problem 4, and the series/ACF/PACF for
-Problem 5. The models were fit only after recording those predictions.
+# Problem 1: Reading the Shape of a Sample
 
-For Problem 1 I compute central moments using denominator $n$ and report
-excess kurtosis, $m_4/m_2^2-3$, matching the course convention. For every model
-comparison I use
+## Prediction
 
-$$
-\operatorname{AICc}=2k-2\ell+
-\frac{2k^2+2k}{n-k-1},
-$$
+The first four sample moments are:
 
-where $\ell$ is the maximized log likelihood and $k$ counts every fitted
-parameter, including the error-distribution parameters. Numerical values are
-rounded in this document, while full precision is available in
-`results.json` and the CSV files in `tables/`.
-
-# Reading the Shape of a Sample
-
-## Prediction from the first four moments
-
-For the 1,000 observations in `problem1.csv`, the first four sample moments
-are:
-
-| Moment | Estimate |
+| Moment | Value |
 |---|---:|
-| Mean | 0.00110439 |
-| Variance | 0.0000961520 |
-| Standard deviation | 0.00980571 |
-| Skewness | -0.668831 |
-| Excess kurtosis | 2.339849 |
+| Mean | 0.001104 |
+| Variance | 0.00009615 |
+| Skewness | -0.6688 |
+| Excess kurtosis | 2.3398 |
 
-The sample is materially left-skewed and leptokurtic. Using only skewness and
-excess kurtosis:
+The negative skewness means the sample has a longer left tail. The positive
+excess kurtosis means it has heavier tails than a Normal distribution.
 
-- **Normal is ruled out.** A Normal has skewness 0 and excess kurtosis 0, so
-  both shape moments disagree with the sample.
-- **Lognormal is ruled out.** A non-degenerate Lognormal has positive
-  skewness, while this sample has negative skewness. This conclusion does not
-  require using the support of the data.
-- **Symmetric Student's $t$ is ruled out.** It can produce positive excess
-  kurtosis, but its skewness is 0 whenever the skewness exists.
-- **Normal inverse Gaussian (NIG) remains plausible.** Its skew parameter can
-  produce negative skewness and it can also produce positive excess kurtosis.
+- **Normal:** ruled out because its skewness and excess kurtosis are both 0.
+- **Lognormal:** ruled out because its skewness should be positive.
+- **Student's $t$:** ruled out because it is symmetric and has zero skewness.
+- **NIG:** plausible because it can have negative skewness and positive excess
+  kurtosis.
 
-This is a screening conclusion, not proof that the NIG generated the sample;
-the first four moments do not uniquely identify a distribution.
+## Fit and reconcile
 
-## Normal fit and tail count
+The fitted Normal has mean 0.001104 and standard deviation 0.009806. Its 1%
+quantile is **-0.021707**. There are **26 observations** below this number. A
+correctly fitted 1% quantile should have about $1000(0.01)=\mathbf{10}$
+observations below it.
 
-I matched the Normal mean and variance to the sample. Therefore
+![Sample distribution and the fitted Normal.](figures/problem1_distribution.png){width=78%}
 
-$$
-X_{\text{Normal}}\sim N(0.00110439,\;0.0000961520).
-$$
+The result agrees with my prediction. The sample has 2.6 times as many lower
+tail observations as the Normal model expects. The Normal model misses the
+negative skewness and heavy tails, so it underestimates large negative values.
 
-Its 1% quantile is **-0.0217071**. There are **26 observations** below that
-threshold, whereas a correctly calibrated 1% quantile would produce
-$1000(0.01)=\mathbf{10}$ observations on average.
+# Problem 2: Regression with Non-Normal Errors
 
-![The fitted Normal misses the sample's asymmetry and tail shape. The dashed line is the fitted Normal's 1% quantile.](figures/problem1_distribution.png){width=88%}
+## Prediction
 
-## Reconciliation
+The scatter plot shows a clear linear relationship with a few large vertical
+errors. Most points are close to the line, but a small number are far away. I
+expect a Student's $t$ error because it allows more extreme errors than a
+Normal distribution.
 
-The fit confirms the moment-based warning. The observed lower-tail count is
-2.6 times the Normal expectation. A symmetric Normal cannot allocate extra
-mass specifically to the left tail, and zero excess kurtosis prevents it from
-matching the sample's combination of a sharp center and heavy tails. Thus the
-Normal understates the probability and severity of large negative outcomes.
-For risk measurement this error is in the dangerous direction: a Normal-based
-left-tail loss threshold would be too optimistic.
+This violates OLS assumption 7: the errors are normally distributed. If the
+other OLS assumptions hold, I do not expect a large or systematic change in
+the slope. However, the usual Normal-based tests and confidence intervals are
+less reliable, and large errors can make the reported standard error unstable.
 
-# A Regression Whose Errors Are Not Normal
+![Scatter plot, fitted lines, and error distributions.](figures/problem2_regression.png){width=96%}
 
-## Prediction from the scatter plot
+## Fit and reconcile
 
-The scatter is centered on a strong, approximately linear relation with slope
-near 3 and intercept near 1.5. Most observations form a tight band, but several
-vertical deviations are far larger than a Normal cloud would suggest. The
-spread looks broadly symmetric rather than one-sided, and there is no dominant
-fan pattern. I therefore predict a **symmetric Student's $t$ error** with few
-degrees of freedom rather than a Normal error.
+| Model | $\alpha$ | $\beta$ | Error fit | AICc |
+|---|---:|---:|---|---:|
+| OLS | 1.5607 | 2.9908 | residual SD = 1.3514 | -- |
+| Normal MLE | 1.5607 | 2.9908 | $\sigma=1.3446$ | 692.145 |
+| Student's $t$ MLE | 1.5480 | 3.0192 | scale = 0.9355, $\nu=3.6322$ | **665.327** |
 
-This violates **OLS assumption 7: the error term is normally distributed**.
-If assumptions 1--6 continue to hold, non-Normality does not create a
-systematic bias in the OLS slope: OLS is still unbiased/consistent, although
-it is more sensitive to extreme observations and is no longer the efficient
-likelihood estimator for a $t$ error. Separately, the usual residual-variance
-formula can still estimate the slope's conditional variance under independent,
-homoskedastic finite-variance errors, but the exact small-sample Student-$t$
-reference distribution for tests and intervals no longer follows. Heavy
-outliers can also inflate the realized residual variance and make the reported
-standard error unstable. I therefore expect the estimated slope to move only
-modestly, while Normal-based inference and tail probabilities are less
-trustworthy.
+The OLS standard errors are 0.0963 for $\alpha$ and 0.0966 for $\beta$. OLS and
+Normal MLE give the same coefficients because both minimize squared errors.
+OLS by itself does not have an AICc because it does not specify an error
+distribution.
 
-![The fitted lines are nearly identical, while the residual panel shows a sharper center and heavier tails than the fitted Normal.](figures/problem2_regression.png){width=100%}
+The Student's $t$ AICc is lower by 26.817, so it is strongly preferred. The
+slopes are still very close: 2.9908 versus 3.0192. This agrees with my
+prediction that non-Normal errors would not change the slope very much. The
+Normal model mainly gets the error shape wrong. It cannot fit both the sharp
+center and the extreme residuals.
 
-## Fits and AICc
+| Quantile | Normal error | Student's $t$ error |
+|---|---:|---:|
+| 95% | 2.2117 | 2.0538 |
+| 99.5% | 3.4635 | 4.6201 |
 
-The fitted values are:
+At 95%, the fitted Normal is wider because the fitted $t$ has a smaller scale.
+At 99.5%, the heavy tail of the $t$ becomes more important, so the $t$ is much
+wider. I would use the Student's $t$ model for a capital buffer because capital
+is intended to protect against rare, extreme losses.
 
-| Model | $\hat\alpha$ | $\hat\beta$ | Error scale | $\nu$ | AICc |
-|---|---:|---:|---:|---:|---:|
-| OLS | 1.560740 | 2.990757 | 1.351401 | -- | 692.145* |
-| Normal MLE | 1.560740 | 2.990757 | 1.344627 | -- | 692.145 |
-| Student-$t$ MLE | 1.547979 | 3.019179 | 0.935509 | 3.632163 | **665.327** |
+# Problem 3: Pearson and Spearman Correlation
 
-For OLS, the standard errors are **0.096269** for $\hat\alpha$ and
-**0.096640** for $\hat\beta$. Its error scale is the residual standard error
-$\sqrt{\mathrm{SSE}/(n-2)}$. The Normal MLE uses
-$\sqrt{\mathrm{SSE}/n}$, which explains the small scale difference. Normal MLE
-and OLS have identical coefficient estimates because maximizing a Normal
-regression likelihood over $\alpha$ and $\beta$ is equivalent to minimizing
-SSE.
+## Prediction
 
-The Student-$t$ scale parameter is not its standard deviation. With
-$\hat\nu=3.632163$, its implied standard deviation is 1.395562. The asterisk on
-the OLS AICc indicates that distribution-free OLS has no likelihood and hence
-no AICc of its own; the displayed value is obtained only after attaching the
-fitted Normal likelihood, making it the Normal MLE comparison.
+![Pair plots for all four variables.](figures/problem3_pairplot.png){width=82%}
 
-Student-$t$ improves AICc by **26.817** relative to Normal even after paying for
-one additional parameter, so the Student-$t$ error model is strongly preferred.
+The $x_1,x_2$ plot has a strong monotonic but curved relationship. I expect
+Spearman to be higher than Pearson for this pair. The $x_1,x_3$ relationship
+looks approximately linear, so the two measures should be closer. Every pair
+with $x_4$ looks unrelated, so both measures should be near 0.
 
-## Reconciliation of slopes and error shape
-
-The OLS/Normal slope is 2.990757 and the Student-$t$ slope is 3.019179, a
-difference of only 0.028422 (about 0.95% of the OLS slope). The violation did
-not move the slope much, consistent with the prediction that the conditional
-mean is well specified and the main problem is the error distribution.
-
-The rejected Normal model gets the **shape of the residual distribution**
-wrong. To accommodate extreme errors with one scale parameter, it spreads too
-much probability through the shoulders of the distribution, yet it still
-assigns too little probability to the far tails and too little density to the
-sharp central peak. This is why the likelihood strongly favors Student-$t$
-even though the fitted regression lines are visually almost identical.
-
-## Error quantiles and a capital buffer
-
-| Upper-tail probability | Normal error quantile | Student-$t$ error quantile | Wider model |
-|---:|---:|---:|---|
-| 95.0% | 2.211715 | 2.053833 | Normal |
-| 99.5% | 3.463530 | 4.620086 | Student-$t$ |
-
-At 95%, the smaller fitted $t$ scale dominates, so the Student-$t$ quantile is
-narrower. Farther into the tail, its power-law tail dominates and the 99.5%
-quantile becomes much wider than the Normal quantile. For a capital buffer I
-would use the **Student-$t$ model**, because a buffer is designed for rare,
-severe outcomes, precisely where the Normal fit is too thin-tailed. The same
-magnitudes apply to the lower tail with the sign reversed because both fitted
-error distributions are symmetric.
-
-# Pearson Against Spearman
-
-## Prediction from all pair plots
-
-![Pair plots reveal a strong but curved monotone relation between x1 and x2, an approximately linear relation between x1 and x3, and little relation involving x4.](figures/problem3_pairplot.png){width=94%}
-
-The $x_1$--$x_2$ pair should produce the largest disagreement. Its relation is
-strongly monotone but visibly S-shaped/curved, so the ranks are nearly
-preserved even though a straight line is not an exact summary. I expect
-Spearman to be much higher than Pearson.
-
-I expect the measures to agree most closely for every pair involving $x_4$,
-because those clouds show no systematic relation and both measures should be
-near zero. They should also be reasonably close for $x_1$--$x_3$, whose cloud
-is approximately linear. The $x_2$--$x_3$ relation is monotone but inherits
-curvature from $x_2$, so I expect a smaller version of the $x_1$--$x_2$ gap.
-
-## Correlation matrices
+## Fit and reconcile
 
 Pearson correlation:
 
@@ -209,38 +129,20 @@ Spearman correlation:
 | $x_3$ | 0.684 | 0.667 | 1.000 | -0.002 |
 | $x_4$ | 0.000 | -0.001 | -0.002 | 1.000 |
 
-![Pearson, Spearman, and their absolute difference.](figures/problem3_correlations.png){width=100%}
+The largest gap is for $x_1,x_2$:
+$|0.7991-0.9719|=\mathbf{0.1728}$. This matches my prediction. Spearman is more
+honest if the question is whether the variables move in the same direction,
+because it measures monotonic rank dependence. Pearson answers how strong the
+linear relationship is. The curved shape makes Pearson lower even though the
+variables are strongly related.
 
-The largest absolute gap is for **$x_1$ and $x_2$**:
+# Problem 4: Conditional Distributions
 
-$$
-|0.799092-0.971930|=\mathbf{0.172838}.
-$$
+## Prediction
 
-## Reconciliation and mechanism
-
-This matches the prediction. Pearson uses the original distances from the
-means and measures **linear** co-movement. The strong curvature means one
-straight-line slope cannot describe the entire $x_1$--$x_2$ relation, and the
-large-magnitude $x_2$ observations receive substantial leverage. Spearman
-first replaces values by ranks, discarding the nonlinear spacing while
-preserving the nearly monotone ordering.
-
-Spearman's 0.972 is the more honest answer to “how strongly do these variables
-move monotonically together?” Pearson's 0.799 answers a different, still useful
-question: “how much standardized linear covariance do these variables share?”
-For a covariance matrix or a linear hedge, Pearson is the relevant quantity;
-for the strength of this nonlinear dependence, Spearman is more descriptive.
-
-# Conditional Distributions
-
-## Prediction from the covariance matrix
-
-The sample mean vector and covariance matrix are
+The sample covariance matrix is
 
 $$
-\hat\mu=
-\begin{bmatrix}-0.016714\\0.045288\end{bmatrix},\qquad
 \hat\Sigma=
 \begin{bmatrix}
 1.099875 & 1.696902\\
@@ -248,151 +150,99 @@ $$
 \end{bmatrix}.
 $$
 
-I define $\Sigma_{11}=\operatorname{Var}(x_1)$,
-$\Sigma_{22}=\operatorname{Var}(x_2)$,
-$\Sigma_{12}=\operatorname{Cov}(x_1,x_2)$, and
-$\Sigma_{21}=\Sigma_{12}'$. Thus $x_1$ is the observed/conditioning block and
-$x_2$ is the target block. Under the multivariate Normal,
+I use $\Sigma_{11}=\operatorname{Var}(x_1)$,
+$\Sigma_{22}=\operatorname{Var}(x_2)$, and the off-diagonal blocks for the
+covariance. The conditional variance is
 
 $$
 \operatorname{Var}(x_2\mid x_1)
-=\Sigma_{22}-\Sigma_{21}\Sigma_{11}^{-1}\Sigma_{12}.
+=\Sigma_{22}-\Sigma_{21}\Sigma_{11}^{-1}\Sigma_{12}
+=1.486746.
 $$
 
 The conditional-to-unconditional variance factor is
 
 $$
 \frac{\Sigma_{22}-\Sigma_{21}\Sigma_{11}^{-1}\Sigma_{12}}
-{\Sigma_{22}}
-=1-\frac{\Sigma_{21}\Sigma_{11}^{-1}\Sigma_{12}}{\Sigma_{22}}
-=\mathbf{0.362201}.
+{\Sigma_{22}}=\mathbf{0.3622}.
 $$
 
-Learning $x_1$ therefore reduces the variance of $x_2$ to 36.22% of its
-unconditional value, a 63.78% reduction. In standard-deviation units the
-factor is $\sqrt{0.362201}=0.601832$.
+Therefore, learning $x_1$ reduces the variance of $x_2$ to 36.22% of its
+original value. Under the multivariate Normal, this factor does not depend on
+the observed value of $x_1$, because $x_1$ does not appear in the conditional
+variance formula.
 
-Under the multivariate Normal, this factor **does not depend on the observed
-value of $x_1$**. The conditional variance formula contains only covariance
-blocks; unlike the conditional mean formula, it contains no term involving
-the realized $x_1$.
-
-## Conditional mean, band, and coverage
+## Fit and reconcile
 
 The conditional mean is
 
 $$
 E[x_2\mid x_1]
-=\mu_2+\Sigma_{21}\Sigma_{11}^{-1}(x_1-\mu_1).
+=\mu_2+\Sigma_{21}\Sigma_{11}^{-1}(x_1-\mu_1)
+=0.071073+1.542813x_1.
 $$
 
-For this sample,
+The coefficient 1.542813 is also the OLS slope from regressing $x_2$ on $x_1$.
+The conditional standard deviation is 1.219322, which gives the constant-width
+95% band shown below.
 
-$$
-\widehat{E[x_2\mid x_1]}
-=0.045288+1.542813(x_1+0.016714)
-=\mathbf{0.071073+1.542813x_1}.
-$$
-
-The coefficient $\Sigma_{21}\Sigma_{11}^{-1}=1.542813$ is exactly the OLS
-slope from regressing $x_2$ on $x_1$ with an intercept. The fitted conditional
-variance is 1.486746, so the conditional standard deviation is 1.219322. I drew
-the 95% band as the fitted conditional mean plus or minus
-$1.959964(1.219322)$.
-
-![Conditional expectation and the constant-width Normal 95% band.](figures/problem4_conditional_distribution.png){width=91%}
+![Conditional mean and 95% Normal band.](figures/problem4_conditional_distribution.png){width=82%}
 
 Overall, **935 of 1,000 observations**, or **93.5%**, fall inside the band.
 
-| Distance of $x_1$ from its mean | Observations | Inside | Coverage | Residual SD |
-|---|---:|---:|---:|---:|
-| Within 1 SD | 759 | 726 | 95.65% | 1.0758 |
-| Between 1 and 2 SD | 190 | 163 | 85.79% | 1.5804 |
-| Beyond 2 SD | 51 | 46 | 90.20% | 1.5957 |
+| Distance of $x_1$ from its mean | Observations | Coverage |
+|---|---:|---:|
+| Within 1 SD | 759 | 95.65% |
+| Between 1 and 2 SD | 190 | 85.79% |
+| Beyond 2 SD | 51 | 90.20% |
 
-## Reconciliation and failed assumption
+Coverage is lower away from the center. The residual standard deviation is
+about 1.08 in the middle and about 1.58 to 1.60 in the outer groups. This means
+the conditional variance is not constant, so the data do not satisfy the
+constant conditional variance implied by a multivariate Normal distribution.
 
-Coverage is close to nominal near the center but substantially lower away
-from the center. The residual standard deviation rises from about 1.08 in the
-central bucket to about 1.58--1.60 in the two outer buckets. Thus the data are
-**heteroskedastic**: $\operatorname{Var}(x_2\mid x_1)$ changes with the location
-of $x_1$. This violates the multivariate-Normal implication of a constant
-conditional covariance, so a single constant-width band cannot be calibrated
-equally across the range of $x_1$.
+The slope still works as the best linear regression coefficient. However, the
+constant band width and exact 95% Normal coverage do not remain valid. Without
+joint Normality, the line is also not guaranteed to be the exact conditional
+mean, although it is still a useful linear fit.
 
-Some parts of the conditional-mean calculation survive. The coefficient
-$\Sigma_{21}\Sigma_{11}^{-1}$ remains the population/sample **best linear
-projection coefficient** without joint Normality, and the plotted line remains
-a useful linear summary if the conditional mean is in fact linear. What no
-longer follows automatically is that this line is the exact conditional
-expectation at every $x_1$. More clearly, the constant conditional variance,
-the constant band width, the exact Normal conditional distribution, and exact
-95% coverage do not survive. The 0.3622 variance factor should therefore be
-interpreted as a pooled linear-projection variance reduction rather than a
-universal conditional-uncertainty factor for every observed $x_1$.
+# Problem 5: Identifying an AR or MA Order
 
-# Identifying an AR or MA Order
+## Prediction
 
-## Prediction from the series, ACF, and PACF
-
-The series fluctuates around a stable mean near 0.67 without a trend. Using the
-course significance band,
+The series looks stationary around a constant mean. The 95% significance band
+is
 
 $$
-\pm\frac{1.96}{\sqrt{500}}=\mathbf{\pm0.087654}.
+\pm\frac{1.96}{\sqrt{500}}=\pm0.08765.
 $$
 
-The ACF has a large positive lag 1 (0.462), is near zero at lag 2, becomes
-negative at lags 3--4, and later returns toward positive values. That is a
-damped, oscillating **decay**, not a clean cutoff. The PACF has decisive spikes
-at lags 1 (0.462) and 2 (-0.303), then is mostly inside the band. I therefore
-predict an **AR(2)** process: for AR($p$), the ACF decays and the PACF cuts off
-after lag $p$; for MA($q$), those roles reverse.
+The ACF decays with an oscillating pattern. The PACF has large spikes at lags 1
+and 2 and is mostly inside the band after lag 2. The rule is:
 
-There is an isolated PACF exceedance at lag 9. I do not treat one late spike as
-a new cutoff: when 20 lags are compared with individual 5% bands, roughly one
-false exceedance is expected by chance even if the later true PACFs are zero.
+- AR($p$): ACF decays and PACF cuts off after lag $p$.
+- MA($q$): ACF cuts off after lag $q$ and PACF decays.
 
-![The ACF decays with an oscillating pattern while the PACF's structural spikes are concentrated at lags 1 and 2.](figures/problem5_series_acf_pacf.png){width=88%}
+Based on this rule, I predict an **AR(2)** process. The isolated PACF spike at
+lag 9 is likely sampling noise rather than a new cutoff.
 
-## Model fits and AICc selection
+![Series, ACF, and PACF.](figures/problem5_series_acf_pacf.png){width=82%}
 
-Every model includes a constant and a Gaussian innovation variance. The exact
-state-space maximum-likelihood fits give:
+## Fit and reconcile
 
-| Model | $k$ | Log likelihood | AICc |
-|---|---:|---:|---:|
-| AR(1) | 3 | -706.2693 | 1418.5870 |
-| AR(2) | 4 | -682.1788 | **1372.4383** |
-| AR(3) | 5 | -682.1109 | 1374.3432 |
-| MA(1) | 3 | -691.5179 | 1389.0843 |
-| MA(2) | 4 | -686.5754 | 1381.2316 |
-| MA(3) | 5 | -681.9975 | 1374.1165 |
+| Model | AICc |
+|---|---:|
+| AR(1) | 1418.5870 |
+| AR(2) | **1372.4383** |
+| AR(3) | 1374.3432 |
+| MA(1) | 1389.0843 |
+| MA(2) | 1381.2316 |
+| MA(3) | 1374.1165 |
 
-AICc selects **AR(2)**, matching the prediction. Its fitted model is
+AICc selects AR(2), so the fitted result matches my prediction. The AR(2)
+coefficients are 0.6012 and -0.3026.
 
-$$
-(x_t-0.670607)=0.601201(x_{t-1}-0.670607)
--0.302638(x_{t-2}-0.670607)+\epsilon_t,
-$$
-
-with innovation variance 0.895802.
-
-## AR(2) versus AR(3)
-
-AR(3) estimates coefficients 0.596203, -0.292690, and **-0.016542**. The third
-coefficient is very small. Adding it improves the log likelihood by only
-$-682.1109-(-682.1788)=0.0679$, while it adds one fitted parameter. The tiny fit
-gain cannot repay AICc's complexity penalty, so AICc rises from 1372.4383 to
-1374.3432 and rejects AR(3).
-
-Ordinary $R^2$ would not make the same tradeoff. Adding another lag enlarges the
-regressor set, so in-sample SSE cannot increase and $R^2$ cannot decrease, even
-when the added coefficient is fitting noise. AICc explicitly charges for the
-extra parameter and therefore favors the more parsimonious AR(2).
-
-# Reproducibility
-
-All calculations and figures are generated by `analysis.py`. The accompanying
-`README.md` gives the exact environment setup and commands needed to reproduce
-every reported result and rebuild this PDF.
+For AR(3), the third coefficient is only -0.0165. It improves the fit very
+little, but AICc adds a penalty for the extra parameter. Therefore, AICc
+prefers AR(2). Ordinary $R^2$ does not include this penalty and cannot decrease
+when another variable or lag is added, so it would not make the same choice.
