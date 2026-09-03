@@ -1,0 +1,2 @@
+n,mean,variance,standard_deviation,skewness,excess_kurtosis,normal_quantile_01,observed_below_normal_quantile_01,expected_below_normal_quantile_01,sample_minimum,sample_maximum
+1000,0.0011043942883968638,9.615197290081312e-05,0.009805711238906289,-0.6688314666632971,2.339848648336579,-0.02170710120569116,26,10.0,-0.0481531022935045,0.0399510964664854
