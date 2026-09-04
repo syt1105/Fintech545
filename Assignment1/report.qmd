@@ -22,6 +22,8 @@ $\operatorname{AICc}=\operatorname{AIC}+(2k^2+2k)/(n-k-1)$.
 
 ## Prediction
 
+### (a) Distribution prediction
+
 The first four sample moments are:
 
 | Moment | Value |
@@ -42,12 +44,16 @@ excess kurtosis means it has heavier tails than a Normal distribution.
 
 ## Fit and reconcile
 
+### (b) Normal 1% quantile
+
 The fitted Normal has mean 0.001104 and standard deviation 0.009806. Its 1%
 quantile is **-0.021707**. There are **26 observations** below this number. A
 correctly fitted 1% quantile should have about $1000(0.01)=\mathbf{10}$
 observations below it.
 
 ![Sample distribution and the fitted Normal.](figures/problem1_distribution.png){width=78%}
+
+### (c) What the Normal gets wrong
 
 The result agrees with my prediction. The sample has 2.6 times as many lower
 tail observations as the Normal model expects. The Normal model misses the
@@ -57,10 +63,14 @@ negative skewness and heavy tails, so it underestimates large negative values.
 
 ## Prediction
 
+### (a) Scatter and expected error distribution
+
 The scatter plot shows a clear linear relationship with a few large vertical
 errors. Most points are close to the line, but a small number are far away. I
 expect a Student's $t$ error because it allows more extreme errors than a
 Normal distribution.
+
+### (b) OLS assumption and expected effect
 
 This violates OLS assumption 7: the errors are normally distributed. If the
 other OLS assumptions hold, I do not expect a large or systematic change in
@@ -69,7 +79,7 @@ less reliable, and large errors can make the reported standard error unstable.
 
 ![Scatter plot, fitted lines, and error distributions.](figures/problem2_regression.png){width=96%}
 
-## Fit and reconcile
+## Fit
 
 | Model | $\alpha$ | $\beta$ | Error fit | AICc |
 |---|---:|---:|---|---:|
@@ -82,11 +92,21 @@ Normal MLE give the same coefficients because both minimize squared errors.
 OLS by itself does not have an AICc because it does not specify an error
 distribution.
 
-The Student's $t$ AICc is lower by 26.817, so it is strongly preferred. The
-slopes are still very close: 2.9908 versus 3.0192. This agrees with my
-prediction that non-Normal errors would not change the slope very much. The
-Normal model mainly gets the error shape wrong. It cannot fit both the sharp
-center and the extreme residuals.
+The Student's $t$ AICc is lower by 26.817, so it is strongly preferred.
+
+## Reconcile
+
+### (c) Slope comparison
+
+The slopes are very close: 2.9908 versus 3.0192. This agrees with my prediction
+that non-Normal errors would not change the slope very much.
+
+### (d) What the rejected model gets wrong
+
+The Normal model mainly gets the error shape wrong. It cannot fit both the
+sharp center and the extreme residuals.
+
+### (e) Error quantiles and capital buffer
 
 | Quantile | Normal error | Student's $t$ error |
 |---|---:|---:|
@@ -102,7 +122,9 @@ is intended to protect against rare, extreme losses.
 
 ## Prediction
 
-![Pair plots for all four variables.](figures/problem3_pairplot.png){width=82%}
+### (a) Expected agreements and disagreements
+
+![Pair plots for all four variables.](figures/problem3_pairplot.png){width=70%}
 
 The $x_1,x_2$ plot has a strong monotonic but curved relationship. I expect
 Spearman to be higher than Pearson for this pair. The $x_1,x_3$ relationship
@@ -110,6 +132,8 @@ looks approximately linear, so the two measures should be closer. Every pair
 with $x_4$ looks unrelated, so both measures should be near 0.
 
 ## Fit and reconcile
+
+### (b) Correlation matrices and largest gap
 
 Pearson correlation:
 
@@ -119,6 +143,10 @@ Pearson correlation:
 | $x_2$ | 0.799 | 1.000 | 0.588 | -0.021 |
 | $x_3$ | 0.719 | 0.588 | 1.000 | -0.009 |
 | $x_4$ | -0.005 | -0.021 | -0.009 | 1.000 |
+
+```{=typst}
+#pagebreak()
+```
 
 Spearman correlation:
 
@@ -130,11 +158,14 @@ Spearman correlation:
 | $x_4$ | 0.000 | -0.001 | -0.002 | 1.000 |
 
 The largest gap is for $x_1,x_2$:
-$|0.7991-0.9719|=\mathbf{0.1728}$. This matches my prediction. Spearman is more
-honest if the question is whether the variables move in the same direction,
-because it measures monotonic rank dependence. Pearson answers how strong the
-linear relationship is. The curved shape makes Pearson lower even though the
-variables are strongly related.
+$|0.7991-0.9719|=\mathbf{0.1728}$. This matches my prediction.
+
+### (c) Why the coefficients differ
+
+Spearman is more honest if the question is whether the variables move in the
+same direction, because it measures monotonic rank dependence. Pearson answers
+how strong the linear relationship is. The curved shape makes Pearson lower
+even though the variables are strongly related.
 
 # Problem 4: Conditional Distributions
 
@@ -149,6 +180,8 @@ $$
 1.696902 & 4.104749
 \end{bmatrix}.
 $$
+
+### (a) Conditional variance and uncertainty factor
 
 I use $\Sigma_{11}=\operatorname{Var}(x_1)$,
 $\Sigma_{22}=\operatorname{Var}(x_2)$, and the off-diagonal blocks for the
@@ -168,11 +201,17 @@ $$
 $$
 
 Therefore, learning $x_1$ reduces the variance of $x_2$ to 36.22% of its
-original value. Under the multivariate Normal, this factor does not depend on
-the observed value of $x_1$, because $x_1$ does not appear in the conditional
-variance formula.
+original value.
+
+### (b) Does the factor depend on the observed value?
+
+Under the multivariate Normal, this factor does not depend on the observed
+value of $x_1$, because $x_1$ does not appear in the conditional variance
+formula.
 
 ## Fit and reconcile
+
+### (c) Conditional mean and 95% band
 
 The conditional mean is
 
@@ -188,13 +227,19 @@ The conditional standard deviation is 1.219322, which gives the constant-width
 
 ![Conditional mean and 95% Normal band.](figures/problem4_conditional_distribution.png){width=82%}
 
+### (d) Overall coverage
+
 Overall, **935 of 1,000 observations**, or **93.5%**, fall inside the band.
+
+### (e) Coverage by distance from the mean
 
 | Distance of $x_1$ from its mean | Observations | Coverage |
 |---|---:|---:|
 | Within 1 SD | 759 | 95.65% |
 | Between 1 and 2 SD | 190 | 85.79% |
 | Beyond 2 SD | 51 | 90.20% |
+
+### (f) What the changing coverage means
 
 Coverage is lower away from the center. The residual standard deviation is
 about 1.08 in the middle and about 1.58 to 1.60 in the outer groups. This means
@@ -210,25 +255,36 @@ mean, although it is still a useful linear fit.
 
 ## Prediction
 
-The series looks stationary around a constant mean. The 95% significance band
-is
+### (a) Cutoff, decay, and predicted order
+
+The series looks stationary around a constant mean. The ACF decays with an
+oscillating pattern. The PACF has large spikes at lags 1 and 2 and is mostly
+inside the band after lag 2. Based on this pattern, I predict an **AR(2)**
+process. The isolated PACF spike at lag 9 is likely sampling noise rather than
+a new cutoff.
+
+### (b) Rule and significance band
+
+The 95% significance band is
 
 $$
 \pm\frac{1.96}{\sqrt{500}}=\pm0.08765.
 $$
 
-The ACF decays with an oscillating pattern. The PACF has large spikes at lags 1
-and 2 and is mostly inside the band after lag 2. The rule is:
+The rule I used is:
 
 - AR($p$): ACF decays and PACF cuts off after lag $p$.
 - MA($q$): ACF cuts off after lag $q$ and PACF decays.
 
-Based on this rule, I predict an **AR(2)** process. The isolated PACF spike at
-lag 9 is likely sampling noise rather than a new cutoff.
-
 ![Series, ACF, and PACF.](figures/problem5_series_acf_pacf.png){width=82%}
 
+```{=typst}
+#pagebreak()
+```
+
 ## Fit and reconcile
+
+### (c) AICc results
 
 | Model | AICc |
 |---|---:|
@@ -239,8 +295,12 @@ lag 9 is likely sampling noise rather than a new cutoff.
 | MA(2) | 1381.2316 |
 | MA(3) | 1374.1165 |
 
+### (d) Selected model
+
 AICc selects AR(2), so the fitted result matches my prediction. The AR(2)
 coefficients are 0.6012 and -0.3026.
+
+### (e) AR(2) versus AR(3), and why not use $R^2$
 
 For AR(3), the third coefficient is only -0.0165. It improves the fit very
 little, but AICc adds a penalty for the extra parameter. Therefore, AICc
