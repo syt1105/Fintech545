@@ -1,4 +1,4 @@
-"""Exponentially weighted covariance and correlation."""
+"""Exponentially weighted covariance and correlation calculations."""
 
 import numpy as np
 

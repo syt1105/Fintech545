@@ -4,8 +4,8 @@ from pathlib import Path
 
 import numpy as np
 
-from psd_repair import near_psd, higham_nearest_psd
-from simulation import simulate_normal, simulate_pca, pca_loadings
+from fintech545.psd_repair import near_psd, higham_nearest_psd
+from fintech545.simulation import simulate_normal, simulate_pca, pca_loadings
 
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "class" / "testfiles" / "data"

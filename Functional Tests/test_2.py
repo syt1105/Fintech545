@@ -8,7 +8,7 @@ from pathlib import Path
 
 import numpy as np
 
-from ew_covariance import ew_covariance, ew_correlation, ew_covariance_mixed
+from fintech545.ew_covariance import ew_covariance, ew_correlation, ew_covariance_mixed
 
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "class" / "testfiles" / "data"

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import numpy as np
 
-from fitting import (
+from fintech545.fitting import (
     aicc_t,
     fit_nig_mle,
     fit_nig_moments,

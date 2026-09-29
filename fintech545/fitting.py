@@ -1,4 +1,4 @@
-"""Distribution fitting functions for Test 7."""
+"""Distribution fitting and information criterion functions."""
 
 import numpy as np
 from scipy import optimize, stats

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 
-from missing_covariance import (
+from fintech545.missing_covariance import (
     missing_covariance_skip_rows,
     missing_correlation_skip_rows,
     missing_covariance_pairwise,

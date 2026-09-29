@@ -5,7 +5,7 @@ from pathlib import Path
 
 import numpy as np
 
-from returns import calculate_returns
+from fintech545.returns import calculate_returns
 
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "class" / "testfiles" / "data"

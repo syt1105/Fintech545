@@ -1,4 +1,4 @@
-"""Covariance and correlation tests with missing data."""
+"""Covariance and correlation calculations with missing data."""
 
 import numpy as np
 

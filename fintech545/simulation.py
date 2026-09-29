@@ -1,8 +1,8 @@
-"""Normal and PCA simulations for Test 5."""
+"""Multivariate normal and PCA-based simulations."""
 
 import numpy as np
 
-from chol_psd import chol_psd
+from .chol_psd import chol_psd
 
 
 def simulate_normal(covariance, count, seed=1234, fix_method=None):

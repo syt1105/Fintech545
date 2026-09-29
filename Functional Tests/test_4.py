@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 
-from chol_psd import chol_psd
+from fintech545.chol_psd import chol_psd
 
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "class" / "testfiles" / "data"

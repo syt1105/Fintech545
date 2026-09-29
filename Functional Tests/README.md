@@ -1,9 +1,15 @@
 # Functional Tests
 
-Run all completed tests from this folder:
+Install the reusable library from the `homework` folder:
 
 ```bash
-python3 -m pytest test_1.py test_2.py test_3.py test_4.py test_5.py test_6.py test_7.py -q
+python3 -m pip install -e ".[test]"
+```
+
+Then run all completed tests from the `homework` folder:
+
+```bash
+python3 -m pytest -q "Functional Tests"
 ```
 
 ## Test 1.1–1.4
@@ -64,4 +70,5 @@ maximum likelihood. The latter converts SciPy's parameters to the teacher's
 `mu, alpha, beta, delta` order. Numerical optimizers can return slightly
 different values, so the t-fit tests use a small comparison tolerance.
 
-If needed, install the Python packages with `python3 -m pip install numpy scipy pytest`.
+The tests import calculations from the `fintech545` package instead of
+keeping separate copies of those functions beside the tests.
