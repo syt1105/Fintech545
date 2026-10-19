@@ -1,0 +1,51 @@
+{
+  "problem1": {
+    "complete_rows": 81,
+    "higham_iterations": 34,
+    "repair_difference": 0.004578781732544504,
+    "full_history_sd": {
+      "A": 0.016501834485687997,
+      "B": 0.01191892862124637,
+      "C": 0.018323548774671447,
+      "D": 0.022828655665025184,
+      "IDX": 0.012281407293682893
+    }
+  },
+  "problem2": {
+    "raw_mean": 0.00016187615348274152,
+    "t_df": 8.269950468095995,
+    "t_loc": 0.00018162209485538837,
+    "t_scale": 0.010289993067639372,
+    "normal_mixture_excess": 2.4687729343943623
+  },
+  "problem3": {
+    "severe_A": 406,
+    "severe_B": 393,
+    "either": 782,
+    "both": 17,
+    "return_correlation": 0.0021995244707939134
+  },
+  "problem4": {
+    "selected": {
+      "X1": "Normal",
+      "X2": "Student t",
+      "X3": "Student t"
+    },
+    "copula_df": 3.6599309055900084,
+    "loglik_gain": 101.55915729805615,
+    "central_days": 784,
+    "central_gain": 49.800344105838974,
+    "central_fraction": 0.4903579886911109,
+    "fitted_u_central_days": 793,
+    "fitted_u_central_gain": 50.47795696015571,
+    "max_rho": 0.5832628140317476,
+    "tail_dependence": 0.321942395092388
+  },
+  "problem5": {
+    "residual_correlation": 0.6983069893066782,
+    "market_sd": 0.010552716980844656,
+    "covariance_decomposition_max_error": 1.6263032587282567e-19
+  },
+  "seed": 54502,
+  "simulations": 100000
+}

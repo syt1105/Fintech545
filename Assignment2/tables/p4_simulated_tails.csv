@@ -1,0 +1,7 @@
+model,pair,lower,upper
+Gaussian,X1-X2,5.95,6.07
+Gaussian,X1-X3,4.57,4.59
+Gaussian,X2-X3,4.2,4.19
+Student t,X1-X2,9.58,9.5
+Student t,X1-X3,8.01,8.24
+Student t,X2-X3,7.6,7.53
